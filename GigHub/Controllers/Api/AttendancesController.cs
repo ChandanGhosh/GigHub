@@ -18,16 +18,18 @@ namespace GigHub.Controllers.Api
         }
 
         [HttpPost]
-        public IHttpActionResult Attend(AttendaceDto dto)
+        public IHttpActionResult AddAttendance(GigDto gigDto)
         {
             var userId = User.Identity.GetUserId();
 
-            if (_db.Attendances.Any(a => a.AttendeeId == userId && a.GigId == dto.GigId))
-                return BadRequest("The attendance already exists");
+            if (_db.Attendances.Any(a => a.AttendeeId == userId && a.GigId == gigDto.Id))
+            {
+                BadRequest("attendance exists!");
+            }
 
             var attendance = new Attendance()
             {
-                GigId = dto.GigId,
+                GigId = gigDto.Id,
                 AttendeeId = userId
             };
 
@@ -35,6 +37,19 @@ namespace GigHub.Controllers.Api
             _db.SaveChanges();
 
             return Ok();
+        }
+        [HttpDelete]
+        public IHttpActionResult DeleteAttendance(GigDto gigDto)
+        {
+            var userId = User.Identity.GetUserId();
+
+            var existingAttendance = _db.Attendances.SingleOrDefault(a => a.AttendeeId == userId && a.GigId == gigDto.Id);
+
+            if (existingAttendance == null) return NotFound();
+
+            _db.Attendances.Remove(existingAttendance);
+            _db.SaveChanges();
+            return Ok(gigDto.Id);
         }
     }
 }

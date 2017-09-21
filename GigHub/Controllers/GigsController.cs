@@ -115,11 +115,15 @@ namespace GigHub.Controllers
                 .Include(a => a.Genre)
                 .ToList();
 
+            var attendances = _db.Attendances
+                .Where(a => a.Attendee.Id == _userId && a.Gig.DateTime > DateTime.Now).ToList().ToLookup(a => a.GigId);
+
             var gigsViewModel = new GigsViewModel()
             {
                 UpcomingGigs = gigs,
                 ShowAction = User.Identity.IsAuthenticated,
-                Heading = "Gigs I'm going"
+                Heading = "Gigs I'm going",
+                Attendances = attendances
             };
 
             return View("Gigs", gigsViewModel);
@@ -129,6 +133,33 @@ namespace GigHub.Controllers
         public ActionResult Search(GigsViewModel gigsViewModel)
         {
             return RedirectToAction("Index", "Home", new { query = gigsViewModel.SearchTerm });
+        }
+
+        
+        public ActionResult Details(int id)
+        {
+            var gig = _db.Gigs.Include(g=> g.Artist).SingleOrDefault(g => g.Id == id);
+
+            if (gig == null) return HttpNotFound();
+
+            var gigDetailsViewModel = new GigsDetailsViewModel()
+            {
+                Gig = gig,
+            };
+
+            if (User.Identity.IsAuthenticated)
+            {
+                var isFollowing = _db.Followings.Any(f => f.FolloweeId == gig.ArtistId && f.FollowerId == _userId);
+                var isAttending = _db.Attendances.Any(a => a.AttendeeId == _userId && a.GigId == gig.Id);
+                
+                gigDetailsViewModel.isFollowing = isFollowing;
+                gigDetailsViewModel.isAttending = isAttending;               
+
+                
+            }
+
+            return View(gigDetailsViewModel);
+
         }
     }
 }

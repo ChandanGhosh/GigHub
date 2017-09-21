@@ -22,7 +22,7 @@ namespace GigHub.Controllers.Api
             var userId = User.Identity.GetUserId();
 
             var exists = _db.Followings.Any(f =>
-                f.FolloweeId == userId && f.FolloweeId == dto.ArtistId); // followee means the artist user trying to follow;
+                f.FolloweeId == userId && f.FolloweeId == dto.ArtistId); // followee means the artist, user trying to follow;
             if (exists)
                 return BadRequest("you are already folloing the artist");
 

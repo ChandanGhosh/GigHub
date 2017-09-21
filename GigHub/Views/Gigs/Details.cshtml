@@ -1,0 +1,24 @@
+﻿@model GigHub.ViewModels.GigsDetailsViewModel
+@{
+    ViewBag.Title = "Details";
+}
+
+
+<h2>
+    <span>@Model.Gig.Artist.Name</span>
+
+    @if (Model.isFollowing)
+    {
+        <button id="following" class="btn btn-info">following</button>
+    }
+    else
+    {
+        <button id="following" class="btn btn-default">follow</button>
+    }
+</h2>
+<p>Performing at @Model.Gig.Venue on @Model.Gig.DateTime.ToString("d MMM") at @Model.Gig.DateTime.ToString("HH:mm")</p>
+
+@if (!Model.Gig.IsCanceled && Model.isAttending)
+{
+    <p>you are going to this event</p>
+}

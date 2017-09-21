@@ -10,8 +10,8 @@
 @using (Html.BeginForm("Search", "Gigs"))
 { 
 
-<div id="searchGigs" class="input-group" style="width: 300px;">
-    @Html.TextBoxFor(m => m.SearchTerm, new { @class = "form-control" })
+<div id="searchGigs" class="input-group input-group-lg" style="width: 320px;">
+    @Html.TextBoxFor(m => m.SearchTerm, new { @class = "form-control ", placeholder="Search by Artist, Genre or Location.." })
     <span class="input-group-addon">
         <i class="glyphicon glyphicon-search"></i>
     </span>
@@ -35,7 +35,7 @@
             </div>
             <div class="details">
                 <span class="artist">
-                    @gig.Artist.Name
+                    <a href="@Url.Action("Details", "Gigs", new {id = gig.Id})">@gig.Artist.Name</a> 
                     
                     @if (gig.IsCanceled)
                     {
@@ -53,8 +53,12 @@
                 
                 @if (Model.ShowAction && !gig.IsCanceled)
                 {
+                    var going = Model.Attendances.Contains(gig.Id);
 
-                    <button data-gig-id="@gig.Id" class="btn btn-default btn-sm pull-right js-toggle-attendance" type="submit">Going ?</button>
+                    <button data-gig-id="@gig.Id" class="btn 
+                            @(going ? "btn-info" : "btn-default") 
+                            btn-sm pull-right js-toggle-attendance" 
+                            type="submit">Going@(going ? "" : "?")</button>
                 }
             </div>
 
@@ -67,26 +71,35 @@
     <script>
         $(document).ready(function() {
             $(".js-toggle-attendance").click(function(e) {
-                var button = $(e.target);
-                $.post("/api/attendances", {"gigId" : button.attr("data-gig-id")})
+                    var button = $(e.target);
+                $.ajax({
+                        url: "/api/attendances",
+                        type: button.hasClass("btn-default") ? "POST" : "DELETE",
+                        data:
+                        {
+                            "id":
+                                button.attr("data-gig-id")
+                        }
+                    })
                     .done(function() {
-                        button.removeClass("btn-default").addClass("btn-info").text("Going");
+                        button.toggleClass("btn-default").toggleClass("btn-info")
+                            .text(button.hasClass("btn-default") ? "Going?" : "Going");
                     })
                     .fail(function() {
                         alert("Something failed!");
                     });
             });
 
-            $(".js-toggle-follow").click(function (e) {
-                var button = $(e.target);
-                $.post("/api/Followings", { "artistId": button.attr("data-artist-id") })
-                    .done(function () {
-                        button.text("Following");
-                    })
-                    .fail(function () {
-                        alert("Something failed!");
-                    });
-            });
+        $(".js-toggle-follow").click(function(e) {
+            var button = $(e.target);
+            $.post("/api/Followings", { "artistId": button.attr("data-artist-id") })
+                .done(function() {
+                    button.text("Following");
+                })
+                .fail(function() {
+                    alert("Something failed!");
+                });
         });
+    });
     </script>
 }
