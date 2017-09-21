@@ -1,31 +1,37 @@
-﻿using GigHub.Models;
-using GigHub.ViewModels;
-using Microsoft.AspNet.Identity;
+﻿using Microsoft.AspNet.Identity;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
+using GigHub.Core;
+using GigHub.Core.Models;
+using GigHub.Core.ViewModels;
+using GigHub.Persistence;
+using GigHub.Repositories;
 
 namespace GigHub.Controllers
 {
     public class GigsController : Controller
     {
-        private readonly ApplicationDbContext _db;
+        
         private readonly string _userId;
+        
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GigsController()
+        public GigsController(IUnitOfWork unitOfWork)
         {
-            _db = new ApplicationDbContext();
+            
             _userId = System.Web.HttpContext.Current.User.Identity.GetUserId();
+            _unitOfWork = unitOfWork;
         }
-
 
 
         [Authorize]
         public ActionResult Mine()
         {
 
-            var gigs = _db.Gigs.Where(g => g.ArtistId == _userId && g.DateTime > DateTime.Now && !g.IsCanceled).Include(g => g.Genre).ToList();
+            var gigs = _unitOfWork.Gigs.GetMyGigs(_userId, this);
 
             return View(gigs);
         }
@@ -36,7 +42,7 @@ namespace GigHub.Controllers
         {
             var viewModel = new GigFormViewModel
             {
-                Genres = _db.Genres.ToList(),
+                Genres = _unitOfWork.Genres.GetGenres(),
                 Heading = "Add a Gig"
             };
 
@@ -45,13 +51,18 @@ namespace GigHub.Controllers
         [Authorize]
         public ActionResult Edit(int id)
         {
-            var gig = _db.Gigs.Single(g => g.Id == id && g.ArtistId == _userId);
+            var gig = _unitOfWork.Gigs.GetGigByIdForCurrentArtist(id, _userId);
 
+            if (gig == null)
+                return HttpNotFound();
+
+            if(gig.ArtistId != _userId)
+                return new HttpUnauthorizedResult();
 
             var viewModel = new GigFormViewModel
             {
                 Id = gig.Id,
-                Genres = _db.Genres.ToList(),
+                Genres = _unitOfWork.Genres.GetGenres(),
                 Date = gig.DateTime.ToString("d MMM yyyy"),
                 Time = gig.DateTime.ToString("HH:mm"),
                 Genre = gig.GenreId,
@@ -69,7 +80,7 @@ namespace GigHub.Controllers
         {
             if (!ModelState.IsValid)
             {
-                viewModel.Genres = _db.Genres.ToList();
+                viewModel.Genres = _unitOfWork.Genres.GetGenres();
                 return View("GigForm", viewModel);
             }
 
@@ -81,8 +92,9 @@ namespace GigHub.Controllers
                 Venue = viewModel.Venue
             };
 
-            _db.Gigs.Add(gig);
-            _db.SaveChanges();
+            _unitOfWork.Gigs.Add(gig);
+            _unitOfWork.Complete();
+
             return RedirectToAction("Mine", "Gigs");
         }
         [Authorize]
@@ -92,42 +104,40 @@ namespace GigHub.Controllers
         {
             if (!ModelState.IsValid)
             {
-                viewModel.Genres = _db.Genres.ToList();
+                viewModel.Genres = _unitOfWork.Genres.GetGenres();
                 return View("GigForm", viewModel);
             }
 
+            var gig = _unitOfWork.Gigs.GetGigWithAttendees(viewModel.Id);
 
-            var gig = _db.Gigs.Include(g => g.Attendances.Select(a => a.Attendee))
-                .Single(g => g.Id == viewModel.Id && g.ArtistId == _userId);
+            if (gig == null)
+                return HttpNotFound();
+
+            if(gig.ArtistId != _userId)
+                return new HttpUnauthorizedResult();
 
             gig.Modify(viewModel.GetDateTime(), viewModel.Venue, viewModel.Genre);
 
-            _db.SaveChanges();
+            _unitOfWork.Complete();
             return RedirectToAction("Mine", "Gigs");
         }
 
         public ActionResult Attending()
         {
-            var gigs = _db.Attendances
-                .Where(a => a.AttendeeId == _userId)
-                .Select(a => a.Gig)
-                .Include(a => a.Artist)
-                .Include(a => a.Genre)
-                .ToList();
-
-            var attendances = _db.Attendances
-                .Where(a => a.Attendee.Id == _userId && a.Gig.DateTime > DateTime.Now).ToList().ToLookup(a => a.GigId);
-
             var gigsViewModel = new GigsViewModel()
             {
-                UpcomingGigs = gigs,
+                UpcomingGigs = _unitOfWork.Gigs.GetGigsUserAttending(_userId),
                 ShowAction = User.Identity.IsAuthenticated,
                 Heading = "Gigs I'm going",
-                Attendances = attendances
+                Attendances = _unitOfWork.Attendances.GetFutureAttendances(_userId).ToLookup(a => a.GigId)
             };
 
             return View("Gigs", gigsViewModel);
         }
+
+        
+
+        
 
         [HttpPost]
         public ActionResult Search(GigsViewModel gigsViewModel)
@@ -138,19 +148,19 @@ namespace GigHub.Controllers
         
         public ActionResult Details(int id)
         {
-            var gig = _db.Gigs.Include(g=> g.Artist).SingleOrDefault(g => g.Id == id);
+            var gig = _unitOfWork.Gigs.GetGigWithArtist(id);
 
             if (gig == null) return HttpNotFound();
 
             var gigDetailsViewModel = new GigsDetailsViewModel()
             {
-                Gig = gig,
+                Gig = gig
             };
 
             if (User.Identity.IsAuthenticated)
             {
-                var isFollowing = _db.Followings.Any(f => f.FolloweeId == gig.ArtistId && f.FollowerId == _userId);
-                var isAttending = _db.Attendances.Any(a => a.AttendeeId == _userId && a.GigId == gig.Id);
+                var isFollowing = _unitOfWork.Followings.GetFollower(_userId, gig.ArtistId) != null;
+                var isAttending = _unitOfWork.Attendances.GetAttendance(gig.Id, _userId) != null;
                 
                 gigDetailsViewModel.isFollowing = isFollowing;
                 gigDetailsViewModel.isAttending = isAttending;               

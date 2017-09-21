@@ -1,4 +1,5 @@
-﻿@model GigHub.ViewModels.GigsDetailsViewModel
+﻿@using Antlr.Runtime.Tree
+@model GigHub.Core.ViewModels.GigsDetailsViewModel
 @{
     ViewBag.Title = "Details";
 }
@@ -6,14 +7,9 @@
 
 <h2>
     <span>@Model.Gig.Artist.Name</span>
-
-    @if (Model.isFollowing)
+    @if (User.Identity.IsAuthenticated)
     {
-        <button id="following" class="btn btn-info">following</button>
-    }
-    else
-    {
-        <button id="following" class="btn btn-default">follow</button>
+        <button id="following" data-artist-id="@Model.Gig.ArtistId" class="btn @(Model.isFollowing ? "btn-info" : "btn-default") js-toggle-follow">@(Model.isFollowing ? "following" : "follow")</button>
     }
 </h2>
 <p>Performing at @Model.Gig.Venue on @Model.Gig.DateTime.ToString("d MMM") at @Model.Gig.DateTime.ToString("HH:mm")</p>
@@ -21,4 +17,20 @@
 @if (!Model.Gig.IsCanceled && Model.isAttending)
 {
     <p>you are going to this event</p>
+}
+
+@section scripts
+{
+    <script>
+        $(".js-toggle-follow").click(function (e) {
+            var button = $(e.target);
+            $.post("/api/Followings", { "artistId": button.attr("data-artist-id") })
+                .done(function () {
+                    button.text("Following");
+                })
+                .fail(function () {
+                    alert("Something failed!");
+                });
+        });
+    </script>
 }

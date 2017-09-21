@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Web.Http;
-using GigHub.Models;
+using GigHub.Core.Models;
+using GigHub.Persistence;
 using Microsoft.AspNet.Identity;
 
 namespace GigHub.Controllers.Api
@@ -22,7 +23,7 @@ namespace GigHub.Controllers.Api
             var userId = User.Identity.GetUserId();
 
             var exists = _db.Followings.Any(f =>
-                f.FolloweeId == userId && f.FolloweeId == dto.ArtistId); // followee means the artist, user trying to follow;
+                f.FollowerId == userId && f.FolloweeId == dto.ArtistId); // followee means the artist, user trying to follow;
             if (exists)
                 return BadRequest("you are already folloing the artist");
 

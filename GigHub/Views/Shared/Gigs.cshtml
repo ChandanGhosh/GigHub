@@ -1,4 +1,4 @@
-﻿@model GigHub.ViewModels.GigsViewModel
+﻿@model GigHub.Core.ViewModels.GigsViewModel
 
 @{
     ViewBag.Title = "Home Page";
@@ -42,24 +42,26 @@
                         <span class="label label-warning">Cancelled</span>
                     }
 
-                    @if (Model.ShowAction)
+                    @*@if (Model.ShowAction)
                     {
                         <button data-artist-id="@gig.ArtistId" class="btn btn-link btn-sm js-toggle-follow">Follow</button>
-                    }
+                    }*@
                 </span>
                 <span class="genre">
                     @gig.Genre.Name
+                    
+                    
                 </span>
-                
                 @if (Model.ShowAction && !gig.IsCanceled)
                 {
                     var going = Model.Attendances.Contains(gig.Id);
 
                     <button data-gig-id="@gig.Id" class="btn 
                             @(going ? "btn-info" : "btn-default") 
-                            btn-sm pull-right js-toggle-attendance" 
+                            js-toggle-attendance" 
                             type="submit">Going@(going ? "" : "?")</button>
                 }
+                
             </div>
 
         </li>
@@ -72,16 +74,7 @@
         $(document).ready(function() {
             GigsController.init("#gigs");
 
-        $(".js-toggle-follow").click(function(e) {
-            var button = $(e.target);
-            $.post("/api/Followings", { "artistId": button.attr("data-artist-id") })
-                .done(function() {
-                    button.text("Following");
-                })
-                .fail(function() {
-                    alert("Something failed!");
-                });
-        });
+        
     });
     </script>
 }
