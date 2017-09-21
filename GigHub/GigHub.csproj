@@ -279,6 +279,9 @@
       <DependentUpon>compilerconfig.json</DependentUpon>
     </None>
     <None Include="Scripts\jquery-3.2.1.intellisense.js" />
+    <Content Include="Scripts\app\app.js" />
+    <Content Include="Scripts\app\controllers\gigsController.js" />
+    <Content Include="Scripts\app\services\attendanceService.js" />
     <Content Include="Scripts\bootbox.js" />
     <Content Include="Scripts\bootbox.min.js" />
     <Content Include="Scripts\bootstrap.js" />
