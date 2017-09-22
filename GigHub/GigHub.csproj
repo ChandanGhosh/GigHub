@@ -234,6 +234,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Persistence\EntityConfigurations\GigConfiguration.cs" />
     <Compile Include="Persistence\Migrations\201709191524532_InitialCreate.cs" />
     <Compile Include="Persistence\Migrations\201709191524532_InitialCreate.Designer.cs">
       <DependentUpon>201709191524532_InitialCreate.cs</DependentUpon>
@@ -384,7 +385,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="fonts\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">
