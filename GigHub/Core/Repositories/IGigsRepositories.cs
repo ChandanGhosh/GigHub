@@ -12,5 +12,6 @@ namespace GigHub.Core.Repositories
         Gig GetGigByIdForCurrentArtist(int id, string userId);
         Gig GetGigWithArtist(int id);
         void Add(Gig gig);
+       
     }
 }

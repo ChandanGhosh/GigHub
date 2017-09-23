@@ -235,6 +235,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Persistence\EntityConfigurations\GigConfiguration.cs" />
+    <Compile Include="Persistence\IApplicationDbContext.cs" />
     <Compile Include="Persistence\Migrations\201709191524532_InitialCreate.cs" />
     <Compile Include="Persistence\Migrations\201709191524532_InitialCreate.Designer.cs">
       <DependentUpon>201709191524532_InitialCreate.cs</DependentUpon>
@@ -256,10 +257,10 @@
     <Compile Include="Core\IUnitOfWork.cs" />
     <Compile Include="Persistence\UnitOfWork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\AttendanceRepository.cs" />
-    <Compile Include="Repositories\FollowingsRepository.cs" />
-    <Compile Include="Repositories\GenreRepository.cs" />
-    <Compile Include="Repositories\GigsRepositories.cs" />
+    <Compile Include="Persistence\Repositories\AttendanceRepository.cs" />
+    <Compile Include="Persistence\Repositories\FollowingsRepository.cs" />
+    <Compile Include="Persistence\Repositories\GenreRepository.cs" />
+    <Compile Include="Persistence\Repositories\GigsRepository.cs" />
     <Compile Include="Core\Repositories\IAttendanceRepository.cs" />
     <Compile Include="Core\Repositories\IFollowingsRepository.cs" />
     <Compile Include="Core\Repositories\IGenreRepository.cs" />

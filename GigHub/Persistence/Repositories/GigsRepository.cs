@@ -2,20 +2,18 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Web;
 using GigHub.Controllers;
 using GigHub.Core.Models;
 using GigHub.Core.Repositories;
-using GigHub.Persistence;
 
-namespace GigHub.Repositories
+namespace GigHub.Persistence.Repositories
 {
-    public class GigsRepositories : IGigsRepositories
+    public class GigsRepository : IGigsRepositories
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IApplicationDbContext _dbContext;
 
 
-        public GigsRepositories(ApplicationDbContext dbContext)
+        public GigsRepository(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -35,6 +33,8 @@ namespace GigHub.Repositories
             return _dbContext.Gigs.Include(g => g.Attendances.Select(a => a.Attendee))
                 .SingleOrDefault(g => g.Id == gigId);
         }
+
+        
 
         public IEnumerable<Gig> GetMyGigs(string userId, GigsController gigsController)
         {

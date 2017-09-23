@@ -5,7 +5,7 @@ using System.Web;
 using GigHub.Core;
 using GigHub.Core.Models;
 using GigHub.Core.Repositories;
-using GigHub.Repositories;
+using GigHub.Persistence.Repositories;
 
 namespace GigHub.Persistence
 {
@@ -22,7 +22,7 @@ namespace GigHub.Persistence
         public UnitOfWork(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
-            Gigs = new GigsRepositories(dbContext);
+            Gigs = new GigsRepository(dbContext);
             Followings=new FollowingsRepository(dbContext);
             Genres = new GenreRepository(dbContext);
             Attendances = new AttendanceRepository(dbContext);

@@ -8,7 +8,7 @@ using System.Web.Mvc;
 using GigHub.Core.Models;
 using GigHub.Core.ViewModels;
 using GigHub.Persistence;
-using GigHub.Repositories;
+using GigHub.Persistence.Repositories;
 using Microsoft.AspNet.Identity;
 
 namespace GigHub.Controllers
@@ -16,7 +16,7 @@ namespace GigHub.Controllers
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly GigsRepositories gigsRepositories;
+        private readonly GigsRepository _gigsRepository;
         private readonly AttendanceRepository attendanceRepository;
         private string _userId;
 
@@ -24,7 +24,7 @@ namespace GigHub.Controllers
         {
             _dbContext = new ApplicationDbContext();
             _userId = System.Web.HttpContext.Current.User.Identity.GetUserId();
-            gigsRepositories=new GigsRepositories(_dbContext);
+            _gigsRepository=new GigsRepository(_dbContext);
             attendanceRepository = new AttendanceRepository(_dbContext);
         }
 

@@ -8,7 +8,6 @@ using GigHub.Core;
 using GigHub.Core.Models;
 using GigHub.Core.ViewModels;
 using GigHub.Persistence;
-using GigHub.Repositories;
 
 namespace GigHub.Controllers
 {
