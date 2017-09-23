@@ -18,6 +18,12 @@ namespace GigHub.Persistence.Repositories
             _dbContext = dbContext;
         }
 
+        public IEnumerable<Gig> GetUpcomingGigsByArtist(string artistId)
+        {
+            return _dbContext.Gigs.Where(g => g.ArtistId == artistId && g.DateTime > DateTime.Now && !g.IsCanceled)
+                .Include(g => g.Genre).ToList();
+        }
+
         public IEnumerable<Gig> GetGigsUserAttending(string userId)
         {
             return _dbContext.Attendances
