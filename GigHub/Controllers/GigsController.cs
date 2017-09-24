@@ -14,21 +14,22 @@ namespace GigHub.Controllers
     public class GigsController : Controller
     {
         
-        private readonly string _userId;
+        private string _userId;
         
         private readonly IUnitOfWork _unitOfWork;
 
         public GigsController(IUnitOfWork unitOfWork)
         {
             
-            _userId = System.Web.HttpContext.Current.User.Identity.GetUserId();
+            //_userId = System.Web.HttpContext.Current.User.Identity.GetUserId();
             _unitOfWork = unitOfWork;
         }
 
 
         [Authorize]
-        public ActionResult Mine()
+        public ViewResult Mine()
         {
+            _userId = User.Identity.GetUserId();
 
             var gigs = _unitOfWork.Gigs.GetMyGigs(_userId, this);
 
@@ -50,6 +51,7 @@ namespace GigHub.Controllers
         [Authorize]
         public ActionResult Edit(int id)
         {
+            _userId = User.Identity.GetUserId();
             var gig = _unitOfWork.Gigs.GetGigByIdForCurrentArtist(id, _userId);
 
             if (gig == null)
@@ -77,6 +79,7 @@ namespace GigHub.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(GigFormViewModel viewModel)
         {
+            _userId = User.Identity.GetUserId();
             if (!ModelState.IsValid)
             {
                 viewModel.Genres = _unitOfWork.Genres.GetGenres();
@@ -101,6 +104,7 @@ namespace GigHub.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Update(GigFormViewModel viewModel)
         {
+            _userId = User.Identity.GetUserId();
             if (!ModelState.IsValid)
             {
                 viewModel.Genres = _unitOfWork.Genres.GetGenres();
@@ -123,6 +127,7 @@ namespace GigHub.Controllers
 
         public ActionResult Attending()
         {
+            _userId = User.Identity.GetUserId();
             var gigsViewModel = new GigsViewModel()
             {
                 UpcomingGigs = _unitOfWork.Gigs.GetGigsUserAttending(_userId),
